@@ -17,3 +17,4 @@ $loader = new \App\Psr4AutoloaderClass();
 $loader->register();
 $loader->addNamespace('Facebook', 'lib/Facebook');
 $loader->addNamespace('App', 'lib/App');
+

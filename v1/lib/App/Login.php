@@ -12,16 +12,20 @@ namespace App;
 class Login
 {
     const INTERN_AUTH = 1;
+    const FACEBOOK_AUTH = 2;
 
     protected $db;
 
     protected $loginData = array();
 
+    protected $publicToken = '';
+
     protected $authMethod;
 
-    public function __construct($postData, $method = Login::INTERN_AUTH)
+    public function __construct($publicToken, $postData, $method = Login::INTERN_AUTH)
     {
         $this->db = DatabaseFactory::getInstance()->getDb();
+        $this->publicToken = $publicToken;
         $this->loginData = $postData;
         $this->authMethod = $method;
     }
@@ -34,6 +38,10 @@ class Login
                 $loginProvider = new Auth\Intern();
                 break;
 
+            case Login::FACEBOOK_AUTH:
+                $loginProvider = new Auth\Facebook($this->loginData);
+                break;
+
             default: //@todo Exception
                 return false;
                 break;
@@ -42,4 +50,9 @@ class Login
         return $loginProvider->authenticate($this->loginData);
     }
 
+
+    static function getLoginUri()
+    {
+        return 'http://' . $_SERVER['SERVER_NAME'] . '/' . \App\App::APP_VERSION . '/login.php';
+    }
 } 

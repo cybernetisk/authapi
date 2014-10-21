@@ -16,23 +16,37 @@ abstract class AbstractService
 
     public $serviceUrl;
 
-    protected $curl;
-
     protected $apiKey;
 
-    public function __construct()
+    public function __construct($serviceName, $serviceUrl)
     {
-        $this->curl = curl_init();
+        $this->serviceName = $serviceName;
+
+        $this->serviceUrl = $serviceUrl;
     }
 
-    protected function _setCurlOptions()
+    public function sendResponse($responseData = array())
     {
-        curl_setopt($this->curl, CURLOPT_USERAGENT, 'AuthService for Cyb');
+        header('Location: ' . $this->_buildResponseUrl($responseData));
+        //@todo LOG
+        die();
     }
 
-    abstract public function sendResponse($responseData = array());
+    public function decryptData($data)
+    {
+        return json_decode($data);
+    }
 
-    abstract protected function _buildResponseUrl();
+    protected function _buildResponseUrl($data)
+    {
+        if (is_array($data))
+            return $this->serviceUrl . '?r=' . $this->_encryptData($data);
+        else
+            return $this->serviceUrl . '?r=' . $data;
+    }
 
-    abstract public function getRequest($requestData = array());
-} 
+    protected function _encryptData(array $data)
+    {
+        return json_encode($data);
+    }
+}

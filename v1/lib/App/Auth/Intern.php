@@ -61,4 +61,4 @@ class Intern extends AbstractMethod
     {
         return password_hash($password, PASSWORD_DEFAULT);
     }
-} 
+}

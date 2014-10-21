@@ -10,10 +10,7 @@
 namespace App;
 
 
-class Response
+class App
 {
-    public function __construct()
-    {
-
-    }
+    const APP_VERSION = 'v1';
 } 

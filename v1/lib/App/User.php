@@ -37,10 +37,13 @@ class User
         $this->userData = $result;
     }
 
-    public function getServiceLevel($serviceName)
+    public function isAuthenticate()
     {
-
+        return !empty($this->userData);
     }
 
-
+    public function getUserId()
+    {
+        return $this->userData['id'];
+    }
 } 

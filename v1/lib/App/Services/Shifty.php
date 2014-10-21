@@ -11,38 +11,19 @@ namespace App\Services;
 
 class Shifty extends AbstractService
 {
+    const SERVICE_ID = 1;
+
+    public $requestField = array(
+        \App\Request::LOGIN => array('username', 'level'),
+    );
 
     public function __construct()
     {
-        $this->serviceName = 'Shifty';
-        $this->serviceUrl = 'http://shifty.blabla';
-        $this->apiKey = '';
+        parent::__construct('Shifty', 'http://shifty.blabla');
     }
 
-    public function getRequest($requestData = array())
+    public function getServiceId()
     {
-        // TODO: Implement getRequest() method.
-    }
-
-    public function sendResponse($responseData = array())
-    {
-        $encryptedData = $this->_encryptData($responseData);
-        curl_exec($this->curl);
-    }
-
-    protected function _setCurlOptions()
-    {
-        parent::_setCurlOptions();
-        curl_setopt($this->curl, CURLOPT_URL, $this->_buildResponseUrl());
-    }
-
-    protected function _buildResponseUrl()
-    {
-        return $this->serviceUrl + '?response=';
-    }
-
-    protected function _encryptData() //@todo
-    {
-
+        return self::SERVICE_ID;
     }
 }

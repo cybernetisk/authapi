@@ -9,34 +9,68 @@
 require_once 'bootstrap.php';
 
 //$_POST['username'] = 'DarkaMaul'; $_POST['password'] = 'test';
-if (!empty($_POST))
+
+$publicToken = (isset($_GET['token'])) ? $_GET['token'] : '';
+$facebookConnexion = new \App\Auth\Facebook($publicToken);
+
+$tryLogin = false;
+
+//Login via Facebook
+if($facebookConnexion->helper->getSessionFromRedirect() instanceof \Facebook\FacebookSession)
 {
-    $login = new \App\Login($_POST);
+    $tryLogin = true;
+    $loginMethod = \App\Login::FACEBOOK_AUTH;
+    $loginData = $facebookConnexion->helper->getSessionFromRedirect();
+
+    var_dump($loginData);
+
+} else if (!empty($_POST)) //Login via InternAuth
+{
+    $tryLogin = true;
+    $loginMethod = \App\Login::INTERN_AUTH;
+    $loginData = $_POST;
+}
+
+if ($tryLogin === true)
+{
+    $login = new \App\Login($publicToken, $loginData, $loginMethod);
     $result = $login->authenticate();
     if ($result !== false)
     {
         $user = new \App\User($result);
+        $request = new \App\Request($_GET);
+        if ($request->isLinked)
+        {
+            if ($user->isAuthenticate())
+            {
+                $request->sendResponse($user);
+            }
+        }
     }
 }
 
 ?>
 
 <html>
+<body>
+<h1>Authentication service (Intern)</h1>
+
+<form method="post" action="">
+    <label for="username">Username:</label>
+    <input type="text" name="login" id="username">
+
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password">
+
+    <button type="submit">Log me in!</button>
+</form>
+
+<p>Not registred yet ? <a href="register.php">Register me!</a></p>
+<p>Log in via <a href="<?= $facebookConnexion->getLoginUri() ?>">Facebook</a> </p>
+
+</body>
+
     <head>
         <title>Login</title>
     </head>
-
-    <body>
-        <h1>Authentication service</h1>
-
-        <form method="post" action="">
-            <label for="username">Username:</label>
-            <input type="text" name="login" id="username">
-
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password">
-
-            <button type="submit">Log me in!</button>
-        </form>
-    </body>
 </html>
