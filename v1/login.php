@@ -39,13 +39,15 @@ if ($tryLogin === true)
     {
         $user = new \App\User($result);
         $request = new \App\Request($_GET);
-        if ($request->isLinked)
+
+        if ($request->getStatusCode() === \App\App::SUCCESS_CODE)
         {
             if ($user->isAuthenticate())
             {
                 $request->sendResponse($user);
             }
         }
+
     }
 }
 
@@ -54,6 +56,11 @@ if ($tryLogin === true)
 <html>
 <body>
 <h1>Authentication service (Intern)</h1>
+
+<?php if (isset($request)): ?>
+<h2>Something went wrong</h2>
+<p> <?= $request->getData(array());  ?>  </p>
+<?php endif; ?>
 
 <form method="post" action="">
     <label for="username">Username:</label>

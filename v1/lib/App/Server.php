@@ -12,17 +12,16 @@ namespace App;
 
 class Server
 {
+    use ErrorTrait;
+
     const PUBLIC_TOKEN = 'publicToken';
     const PRIVATE_TOKEN = 'privateToken';
-
-    const SUCCESS_CODE  = 1;
-    const ERROR_CODE    = 0;
 
     const INTERN_ERROR = 'internError';
     const MISSING_TOKEN = 'missingToken';
     const INVALID_EXPIRED_TOKEN = 'invalidToken';
 
-    protected $errorMessages = array(
+    protected $errorMessageArray = array(
         self::INTERN_ERROR => 'Something went wrong with the server',
         self::MISSING_TOKEN => 'Private token required for this action',
         self::INVALID_EXPIRED_TOKEN => 'Invalid or expired token',
@@ -56,12 +55,6 @@ class Server
         $this->serviceClass = new $className();
     }
 
-
-    protected function _getErrorMessage($error = self::INTERN_ERROR)
-    {
-        return array('message' => $this->errorMessages[$error]);
-    }
-
     public function generateTokens()
     {
         $tokensArray = array(
@@ -81,10 +74,10 @@ class Server
             'askUri' => \App\Server::getAskUri($tokensArray[self::PRIVATE_TOKEN], $this->serviceName),
         ));
 
-        if ($return === true)
-            $this->displayResponse(self::SUCCESS_CODE, $returnData);
-        else
-            $this->displayResponse(self::ERROR_CODE, $this->_getErrorMessage(self::INTERN_ERROR));
+        if ($return === false)
+            $this->setError(self::INTERN_ERROR);
+
+        $this->displayResponse($this->getStatusCode(), $this->getData($returnData));
     }
 
     public function displayResponse($code, $returnData = array())
@@ -99,8 +92,10 @@ class Server
 
     public function verifyTokens()
     {
+        $result = array();
+
         if ($this->privateToken === '')
-            $this->displayResponse(self::ERROR_CODE, $this->_getErrorMessage(self::MISSING_TOKEN));
+            $this->setError(self::MISSING_TOKEN);
         else
         {
             $sql = $this->db->prepare('SELECT username, level FROM tokens WHERE privateToken = :token AND expirationTime > NOW() LIMIT 1;');
@@ -109,10 +104,10 @@ class Server
             $result = $sql->fetch(\PDO::FETCH_ASSOC);
 
             if ($result === false)
-                $this->displayResponse(self::ERROR_CODE, $this->_getErrorMessage(self::INVALID_EXPIRED_TOKEN));
-            else
-                $this->displayResponse(self::SUCCESS_CODE, $result);
+                $this->setError(self::INVALID_EXPIRED_TOKEN);
         }
+
+        $this->displayResponse($this->getStatusCode(), $this->getData($result));
     }
 
     public function getRequest($request)

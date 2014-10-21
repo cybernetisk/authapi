@@ -9,6 +9,8 @@
 
 namespace App;
 
+use App\Exception\ArgumentException;
+
 class Login
 {
     const INTERN_AUTH = 1;
@@ -42,8 +44,8 @@ class Login
                 $loginProvider = new Auth\Facebook($this->loginData);
                 break;
 
-            default: //@todo Exception
-                return false;
+            default:
+                throw new ArgumentException("Unknown authentication method : " . $this->authMethod);
                 break;
         }
 

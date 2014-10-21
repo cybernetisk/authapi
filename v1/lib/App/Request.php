@@ -11,6 +11,8 @@ namespace App;
 
 class Request
 {
+    use ErrorTrait;
+
     const LOGIN = 'login';
 
     public $isLinked = false;
@@ -21,6 +23,18 @@ class Request
 
     protected $service;
     protected $request;
+
+    const INVALID_SERVICE   = 'invalidService';
+    const NEEDED_TOKEN      = 'neededToken';
+    const NEEDED_REQUEST    = 'neededRequest';
+    const UNKNOWN_REQUEST   = 'unknownRequest';
+
+    protected $errorMessageArray = array(
+        self::INVALID_SERVICE   => 'The provided service is unknown.',
+        self::NEEDED_TOKEN      => 'A token is needed to authenticate yourself.',
+        self::NEEDED_REQUEST    => 'A request is needed to perform authentication.',
+        self::UNKNOWN_REQUEST   => 'This request %s is unknown',
+    );
 
     private $authorizedServices = array('shifty');
     private $authorizedRequest = array('login', 'tokenGen');
@@ -37,23 +51,23 @@ class Request
         {
             $serviceId = $this->_getServiceIdByToken($request['token']);
             if ($serviceId === false)
-                echo 'Error'; //@todo Exception
+                $this->setError(self::INVALID_SERVICE);
             else
             {
                 $this->_initializeService($this->servicesArray[$serviceId]);
                 $this->publicToken = $request['token'];
             }
         } else
-            die(); //@todo Exception
+            $this->setError(self::NEEDED_TOKEN);
 
         if (isset($request['request']))
         {
             if (in_array($request['request'], $this->authorizedRequest))
                 $this->request = $request['request'];
-            else //@todo Exception
-                die();
+            else
+                $this->setError(self::UNKNOWN_REQUEST, $request['request']);
         } else
-            die(); //@todo Exception
+            $this->setError(self::NEEDED_REQUEST);
 
     }
 
