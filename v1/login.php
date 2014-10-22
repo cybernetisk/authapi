@@ -8,10 +8,11 @@
  */
 require_once 'bootstrap.php';
 
-//$_POST['username'] = 'DarkaMaul'; $_POST['password'] = 'test';
 
 $publicToken = (isset($_GET['token'])) ? $_GET['token'] : '';
 $facebookConnexion = new \App\Auth\Facebook($publicToken);
+
+//var_dump($facebookConnexion);
 
 $tryLogin = false;
 
@@ -59,12 +60,12 @@ if ($tryLogin === true)
 
 <?php if (isset($request)): ?>
 <h2>Something went wrong</h2>
-<p> <?= $request->getData(array());  ?>  </p>
+<p> <?= $request->getError();  ?>  </p>
 <?php endif; ?>
 
 <form method="post" action="">
     <label for="username">Username:</label>
-    <input type="text" name="login" id="username">
+    <input type="text" name="username" id="username">
 
     <label for="password">Password:</label>
     <input type="password" name="password" id="password">

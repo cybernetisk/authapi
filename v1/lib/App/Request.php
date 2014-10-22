@@ -9,6 +9,10 @@
 
 namespace App;
 
+use App\Exception\ArgumentException;
+use App\Exception\InvalidMethodCall;
+use App\Exception\UnexpectedValueException;
+
 class Request
 {
     use ErrorTrait;
@@ -49,12 +53,12 @@ class Request
 
         if (isset($request['token']))
         {
-            $serviceId = $this->_getServiceIdByToken($request['token']);
+            $serviceId = $this->getServiceIdByToken($request['token']);
             if ($serviceId === false)
                 $this->setError(self::INVALID_SERVICE);
             else
             {
-                $this->_initializeService($this->servicesArray[$serviceId]);
+                $this->initializeService($this->servicesArray[$serviceId]);
                 $this->publicToken = $request['token'];
             }
         } else
@@ -71,7 +75,7 @@ class Request
 
     }
 
-    protected function _getServiceIdByToken($publicToken)
+    protected function getServiceIdByToken($publicToken)
     {
         $sql = $this->db->prepare('SELECT serviceId FROM tokens WHERE publicToken = :token LIMIT 1');
         $sql->execute(array(
@@ -85,7 +89,7 @@ class Request
         return $result;
     }
 
-    protected function _initializeService($serviceName)
+    protected function initializeService($serviceName)
     {
         $className = '\App\Services\\' . $serviceName;
         $this->service = new $className();
@@ -93,7 +97,7 @@ class Request
         $this->isLinked = true;
     }
 
-    protected function _loginResponse($requestFields, User $user)
+    protected function loginResponse($requestFields, User $user)
     {
         $sql = $this->db->prepare('SELECT p.level,u.username FROM permissions as p INNER JOIN users as u WHERE u.id = p.userId AND serviceId = :serviceId AND u.id = :userId LIMIT 1');
         $sql->execute(array(
@@ -103,44 +107,44 @@ class Request
 
         $result = $sql->fetch(\PDO::FETCH_ASSOC);
 
-        if ($result === false) //@todo Exception
-            die();
+        if ($result === false)
+            throw new UnexpectedValueException("Identification request went wrong.");
         else
             return $result;
     }
 
     public function sendResponse($user = false)
     {
-        if ($this->isLinked === false) die();
-            //@todo Exception
+        if ($this->isLinked === false)
+            throw new InvalidMethodCall("This method should not been called if there is no linked service.");
 
         $requestField = $this->service->requestField[$this->request];
         switch($this->request)
         {
             case 'login':
-                $returnResult = $this->_loginResponse($requestField, $user);
+                $returnResult = $this->loginResponse($requestField, $user);
                 break;
 
             default:
-                die(); //@todo Exception
+                throw new ArgumentException(sprintf("Unknown request : %s .", $this->request));
         }
 
-        $this->_updateTokens($returnResult);
+        $this->updateTokens($returnResult);
 
         $this->service->sendResponse($this->publicToken);
     }
 
-    protected function _updateTokens($returnResult)
+    protected function updateTokens($returnResult)
     {
         $sql = $this->db->prepare('UPDATE tokens SET username = :username, level = :level WHERE publicToken = :token ;');
         $result = $sql->execute(array(
-           ':username' => $returnResult['username'],
+            ':username' => $returnResult['username'],
             ':level' => $returnResult['level'],
             ':token' => $this->publicToken,
         ));
 
         if ($result === false)
-            die(); //@todo exception
+            throw new UnexpectedValueException("Update token went wrong");
 
         return true;
     }

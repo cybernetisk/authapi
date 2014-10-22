@@ -15,7 +15,7 @@ use App\Exception\InvalidMethodCall;
 trait ErrorTrait
 {
     public $hasError = false;
-    public $errorMessageArray = array();
+    protected $errorMessageArray;
 
     public $errorMessage;
 
