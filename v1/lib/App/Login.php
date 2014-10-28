@@ -41,7 +41,7 @@ class Login
                 break;
 
             case Login::FACEBOOK_AUTH:
-                $loginProvider = new Auth\Facebook($this->loginData);
+                $loginProvider = new Auth\Facebook($this->publicToken);
                 break;
 
             default:
@@ -53,8 +53,12 @@ class Login
     }
 
 
-    static function getLoginUri()
+    static function getLoginUri($parametersArray = array())
     {
-        return 'http://' . $_SERVER['SERVER_NAME'] . '/' . \App\App::APP_VERSION . '/login.php';
+        $baseUrl = 'http://' . $_SERVER['SERVER_NAME'] . '/' . \App\App::APP_VERSION . '/login.php?';
+        foreach ($parametersArray as $name => $value)
+            $baseUrl .=  $name . '=' . $value . '&';
+
+        return $baseUrl;
     }
 } 

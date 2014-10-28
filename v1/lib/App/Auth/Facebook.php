@@ -9,28 +9,38 @@
 
 namespace App\Auth;
 
-use Facebook\FacebookRedirectLoginHelper;
+use App\Exception\ArgumentException;
+use Facebook\FacebookRequest;
 use Facebook\FacebookSession;
+use Facebook\GraphUser;
 
 class Facebook extends AbstractMethod
 {
+    protected $publicToken;
 
-    public $fbHelper;
-
-    public function __construct($publicToken, $facebookSession = false)
+    public function __construct($publicToken)
     {
-        FacebookSession::setDefaultApplication('378344682313337', 'b8476b290aa2abcdb9168a6190d89ea0');
-        $this->helper = new FacebookRedirectLoginHelper(\App\Login::getLoginUri() . '?token=' . $publicToken);
+        parent::__construct();
+        $this->publicToken = $publicToken;
     }
 
 
-    function authenticate($userData)
+    //@todo Implements facebook Exception
+    function authenticate($facebookSession)
     {
-        // TODO: Implement authenticate() method.
-    }
+        if (! $facebookSession instanceof FacebookSession)
+            throw new ArgumentException('Facebook authentification need a valid FacebookSession object');
 
-    public function getLoginUri()
-    {
-        return $this->helper->getLoginUrl();
+        $response = (new FacebookRequest($facebookSession, 'GET', '/me'))->execute();
+        $userFacebookId = $response->getGraphObject(GraphUser::className())->getId();
+
+        $sqlRequest = $this->db->prepare('SELECT id FROM users WHERE facebookId = ? LIMIT 1');
+        $sqlRequest->execute(array($userFacebookId));
+
+        $result = $sqlRequest->fetchAll(\PDO::FETCH_ASSOC);
+        if (!empty($result))
+            return $result[0]['id'];
+
+        return false;
     }
 }

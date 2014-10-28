@@ -11,13 +11,11 @@ namespace App\Auth;
 
 class Intern extends AbstractMethod
 {
-    protected $db;
-
     protected $requiredFields = array('username', 'password');
 
     public function __construct()
     {
-        $this->db = \App\DatabaseFactory::getInstance()->getDb();
+        parent::__construct();
     }
 
     /**

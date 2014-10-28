@@ -4,3 +4,5 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ /v1/index.php/$1 [QSA,NC,L]
 </IfModule>
+
+SetEnv APP_MODE dev
