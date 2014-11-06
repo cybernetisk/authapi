@@ -1,0 +1,20 @@
+[global]
+facebook.appid =
+facebook.secretid =
+
+mail.from.email = 'noreply@cyblogin'
+mail.from.name  = 'CyB Register Service'
+mail.replyto = 'noreply@cyblogin'
+mail.encoding = 'UTF-8'
+
+[production]
+database.host =
+database.dbname =
+database.username =
+database.password =
+
+[dev]
+database.host     = 'localhost'
+database.dbname   =
+database.username =
+database.password =

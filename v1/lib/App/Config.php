@@ -20,14 +20,12 @@ class Config
     protected $databaseInfo = array();
     protected $generalInfo = array();
 
-    /**
-     *
-     */
-    private function __construct()
+
+    private function __construct($configFile = "global.ini")
     {
 
         $reader = new Ini();
-        $data = $reader->fromFile(APP_PATH . '/config/global.ini');
+        $data = $reader->fromFile(APP_PATH . '/config/' . $configFile);
 
         $this->generalInfo = $data['global'];
         $this->databaseInfo = $data[APP_ENV]['database'];
