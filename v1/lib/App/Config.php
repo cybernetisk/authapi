@@ -11,12 +11,11 @@ namespace App;
 
 
 use App\Exception\ArgumentException;
+use Zend\Config\Reader\Ini;
 
 class Config
 {
     private static $instance = null;
-
-    protected $dbh;
 
     protected $databaseInfo = array();
     protected $generalInfo = array();
@@ -27,7 +26,7 @@ class Config
     private function __construct()
     {
 
-        $reader = new \Zend\Config\Reader\Ini();
+        $reader = new Ini();
         $data = $reader->fromFile(APP_PATH . '/config/global.ini');
 
         $this->generalInfo = $data['global'];
@@ -43,13 +42,10 @@ class Config
                 return $this->databaseInfo;
                 break;
 
-            case 'facebook':
-                return $this->generalInfo['facebook'];
-                break;
-
             default:
                 if (array_key_exists($configKey, $this->generalInfo))
                     return $this->generalInfo[$configKey];
+
                 throw new ArgumentException("$configKey is not a valid config param");
                 break;
         }

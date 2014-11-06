@@ -53,12 +53,13 @@ class Login
     }
 
 
+    /**
+     * @deprecated
+     * @param array $parametersArray
+     * @return string
+     */
     static function getLoginUri($parametersArray = array())
     {
-        $baseUrl = 'http://' . $_SERVER['SERVER_NAME'] . '/' . \App\App::APP_VERSION . '/login.php?';
-        foreach ($parametersArray as $name => $value)
-            $baseUrl .=  $name . '=' . $value . '&';
-
-        return $baseUrl;
+        return App::getPageUri('login', $parametersArray);
     }
 } 

@@ -9,22 +9,20 @@
 
 namespace App;
 
+use App\Config;
+
 class DatabaseFactory
 {
     private static $instance = null;
-
-    //TODO read by ini file
-    private $host = 'localhost';
-    private $dbName = 'apiauth';
-    private $dbUsername = 'apiauth';
-    private $dbPassword = '9DpzYPAD59EFM9Tu';
 
     protected $dbh;
 
     private function __construct()
     {
 
-        $this->dbh = new \PDO('mysql: host=' . $this->host . ';dbname=' . $this->dbName, $this->dbUsername);//, $this->dbPassword);
+        $databaseConfig = Config::getInstance()->getConfig("database");
+
+        $this->dbh = new \PDO('mysql: host=' . $databaseConfig['host'] . ';dbname=' . $databaseConfig['dbname'], $databaseConfig['username']);//, $databaseConfig['password']);
         $this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
